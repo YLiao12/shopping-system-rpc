@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "./;demo";
+
+package demo;
+
+message UserId {
+  int32 userId = 1;
+}
+
+message UserInfo {
+  int32 userId = 1;
+  string name = 2;
+  int32 balance = 3;
+}
+
+message Response {
+  int32 result = 1;
+}
+
+// 定义服务
+service Demo {
+  // 简单模式。一个请求，一个响应。
+  rpc getUserByUserId(UserId) returns (UserInfo);
+}
