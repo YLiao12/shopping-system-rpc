@@ -47,7 +47,7 @@ func initUserDB() (err error) {
 }
 
 //新建用户
-func (s *demoServer) createUser(ctx context.Context, in *demo.UserInfo) (*demo.Response, error) {
+func (s *demoServer) CreateUser(ctx context.Context, in *demo.UserInfo) (*demo.Response, error) {
 	sqlStr := "insert into users(name, balance) values (?,?)"
 	ret, err := userDb.Exec(sqlStr, in.Name, in.Balance)
 	if err != nil {
@@ -57,7 +57,7 @@ func (s *demoServer) createUser(ctx context.Context, in *demo.UserInfo) (*demo.R
 	if insErr != nil {
 		fmt.Printf("get lastinsert ID failed, err:%v\n", insErr)
 	}
-	
+
 	fmt.Printf("insert success, the id is %d.\n", theID)
 	response := &demo.Response{
 		Result: 1,
