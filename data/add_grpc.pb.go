@@ -20,6 +20,12 @@ const _ = grpc.SupportPackageIsVersion7
 type DemoClient interface {
 	// 简单模式。一个请求，一个响应。
 	GetUserByUserId(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*UserInfo, error)
+	GetProducts(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Demo_GetProductsClient, error)
+	GetProduct(ctx context.Context, in *ProductId, opts ...grpc.CallOption) (*Product, error)
+	MakeOrder(ctx context.Context, in *OrderInfo, opts ...grpc.CallOption) (*Response, error)
+	DecreaseUserBalance(ctx context.Context, in *DecreaseBalance, opts ...grpc.CallOption) (*Response, error)
+	DecreaseProductStock(ctx context.Context, in *ProductId, opts ...grpc.CallOption) (*Response, error)
+	CreateUser(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*Response, error)
 }
 
 type demoClient struct {
@@ -39,12 +45,95 @@ func (c *demoClient) GetUserByUserId(ctx context.Context, in *UserId, opts ...gr
 	return out, nil
 }
 
+func (c *demoClient) GetProducts(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Demo_GetProductsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Demo_ServiceDesc.Streams[0], "/demo.Demo/getProducts", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &demoGetProductsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Demo_GetProductsClient interface {
+	Recv() (*Product, error)
+	grpc.ClientStream
+}
+
+type demoGetProductsClient struct {
+	grpc.ClientStream
+}
+
+func (x *demoGetProductsClient) Recv() (*Product, error) {
+	m := new(Product)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *demoClient) GetProduct(ctx context.Context, in *ProductId, opts ...grpc.CallOption) (*Product, error) {
+	out := new(Product)
+	err := c.cc.Invoke(ctx, "/demo.Demo/getProduct", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *demoClient) MakeOrder(ctx context.Context, in *OrderInfo, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/demo.Demo/makeOrder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *demoClient) DecreaseUserBalance(ctx context.Context, in *DecreaseBalance, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/demo.Demo/decreaseUserBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *demoClient) DecreaseProductStock(ctx context.Context, in *ProductId, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/demo.Demo/decreaseProductStock", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *demoClient) CreateUser(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/demo.Demo/createUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DemoServer is the server API for Demo service.
 // All implementations must embed UnimplementedDemoServer
 // for forward compatibility
 type DemoServer interface {
 	// 简单模式。一个请求，一个响应。
 	GetUserByUserId(context.Context, *UserId) (*UserInfo, error)
+	GetProducts(*Empty, Demo_GetProductsServer) error
+	GetProduct(context.Context, *ProductId) (*Product, error)
+	MakeOrder(context.Context, *OrderInfo) (*Response, error)
+	DecreaseUserBalance(context.Context, *DecreaseBalance) (*Response, error)
+	DecreaseProductStock(context.Context, *ProductId) (*Response, error)
+	CreateUser(context.Context, *UserInfo) (*Response, error)
 	mustEmbedUnimplementedDemoServer()
 }
 
@@ -54,6 +143,24 @@ type UnimplementedDemoServer struct {
 
 func (UnimplementedDemoServer) GetUserByUserId(context.Context, *UserId) (*UserInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserByUserId not implemented")
+}
+func (UnimplementedDemoServer) GetProducts(*Empty, Demo_GetProductsServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetProducts not implemented")
+}
+func (UnimplementedDemoServer) GetProduct(context.Context, *ProductId) (*Product, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProduct not implemented")
+}
+func (UnimplementedDemoServer) MakeOrder(context.Context, *OrderInfo) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MakeOrder not implemented")
+}
+func (UnimplementedDemoServer) DecreaseUserBalance(context.Context, *DecreaseBalance) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DecreaseUserBalance not implemented")
+}
+func (UnimplementedDemoServer) DecreaseProductStock(context.Context, *ProductId) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DecreaseProductStock not implemented")
+}
+func (UnimplementedDemoServer) CreateUser(context.Context, *UserInfo) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
 func (UnimplementedDemoServer) mustEmbedUnimplementedDemoServer() {}
 
@@ -86,6 +193,117 @@ func _Demo_GetUserByUserId_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Demo_GetProducts_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(DemoServer).GetProducts(m, &demoGetProductsServer{stream})
+}
+
+type Demo_GetProductsServer interface {
+	Send(*Product) error
+	grpc.ServerStream
+}
+
+type demoGetProductsServer struct {
+	grpc.ServerStream
+}
+
+func (x *demoGetProductsServer) Send(m *Product) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Demo_GetProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProductId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DemoServer).GetProduct(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/demo.Demo/getProduct",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DemoServer).GetProduct(ctx, req.(*ProductId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Demo_MakeOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OrderInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DemoServer).MakeOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/demo.Demo/makeOrder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DemoServer).MakeOrder(ctx, req.(*OrderInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Demo_DecreaseUserBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DecreaseBalance)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DemoServer).DecreaseUserBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/demo.Demo/decreaseUserBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DemoServer).DecreaseUserBalance(ctx, req.(*DecreaseBalance))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Demo_DecreaseProductStock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProductId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DemoServer).DecreaseProductStock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/demo.Demo/decreaseProductStock",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DemoServer).DecreaseProductStock(ctx, req.(*ProductId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Demo_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DemoServer).CreateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/demo.Demo/createUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DemoServer).CreateUser(ctx, req.(*UserInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Demo_ServiceDesc is the grpc.ServiceDesc for Demo service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -97,7 +315,33 @@ var Demo_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "getUserByUserId",
 			Handler:    _Demo_GetUserByUserId_Handler,
 		},
+		{
+			MethodName: "getProduct",
+			Handler:    _Demo_GetProduct_Handler,
+		},
+		{
+			MethodName: "makeOrder",
+			Handler:    _Demo_MakeOrder_Handler,
+		},
+		{
+			MethodName: "decreaseUserBalance",
+			Handler:    _Demo_DecreaseUserBalance_Handler,
+		},
+		{
+			MethodName: "decreaseProductStock",
+			Handler:    _Demo_DecreaseProductStock_Handler,
+		},
+		{
+			MethodName: "createUser",
+			Handler:    _Demo_CreateUser_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "getProducts",
+			Handler:       _Demo_GetProducts_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "add.proto",
 }

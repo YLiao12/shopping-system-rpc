@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
@@ -27,24 +26,43 @@ type User struct {
 	balance int32 `db:"balance"`
 }
 
-var db *sql.DB
+var userDb *sql.DB
 
 // 定义一个初始化数据库的函数
-func initDB() (err error) {
+func initUserDB() (err error) {
 	// DSN:Data Source Name
 	dsn := "leo:21516114@tcp(139.196.187.198:3306)/rpc_user?charset=utf8mb4&parseTime=True"
 	// 不会校验账号密码是否正确
 	// 注意！！！这里不要使用:=，我们是给全局变量赋值，然后在main函数中使用全局变量db
-	db, err = sql.Open("mysql", dsn)
+	userDb, err = sql.Open("mysql", dsn)
 	if err != nil {
 		return err
 	}
 	// 尝试与数据库建立连接（校验dsn是否正确）
-	err = db.Ping()
+	err = userDb.Ping()
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+//新建用户
+func (s *demoServer) createUser(ctx context.Context, in *demo.UserInfo) (*demo.Response, error) {
+	sqlStr := "insert into users(name, balance) values (?,?)"
+	ret, err := userDb.Exec(sqlStr, in.Name, in.Balance)
+	if err != nil {
+		fmt.Printf("insert failed, err:%v\n", err)
+	}
+	theID, insErr := ret.LastInsertId() // 新插入数据的id
+	if insErr != nil {
+		fmt.Printf("get lastinsert ID failed, err:%v\n", insErr)
+	}
+	
+	fmt.Printf("insert success, the id is %d.\n", theID)
+	response := &demo.Response{
+		Result: 1,
+	}
+	return response, err
 }
 
 //查询用户
@@ -52,7 +70,7 @@ func (s *demoServer) GetUserByUserId(ctx context.Context, in *demo.UserId) (*dem
 	sqlStr := "select name, balance from users where id = ?;"
 	var u User
 	// 非常重要：确保QueryRow之后调用Scan方法，否则持有的数据库链接不会被释放
-	err := db.QueryRow(sqlStr, in.UserId).Scan(&u.name, &u.balance)
+	err := userDb.QueryRow(sqlStr, in.UserId).Scan(&u.name, &u.balance)
 
 	cRes := &demo.UserInfo{
 		UserId:  in.UserId,
@@ -66,39 +84,51 @@ func (s *demoServer) GetUserByUserId(ctx context.Context, in *demo.UserId) (*dem
 	return cRes, err
 }
 
+func (s *demoServer) DecreaseUserBalance(ctx context.Context, in *demo.DecreaseBalance) (*demo.Response, error) {
+	userId := in.UserId
+	price := in.Price
+	balance := in.Balance
+	sqlStr := "update users set balance = ? where id = ?"
+	ret, err := userDb.Exec(sqlStr, balance-price, userId)
+	if err != nil {
+		fmt.Printf("update failed, err:%v\n", err)
+	}
+	if err != nil {
+		fmt.Printf("get lastinsert ID failed, err:%v\n", err)
+	}
+	fmt.Printf("user table update success, affected rows:%d \n", ret)
+
+	response := &demo.Response{
+		Result: 1,
+	}
+
+	return response, err
+}
+
 var (
-	tls  = flag.Bool("tls", false, "使用启用tls") //默认false
-	port = flag.Int("port", 50055, "服务端口")    //默认50055
+	portUser = flag.Int("port", 50055, "服务端口") //默认50055
 )
 
 func main() {
 	flag.Parse()
 
-	errDb := initDB() // 调用输出化数据库的函数
+	errDb := initUserDB() // 调用输出化数据库的函数
 	if errDb != nil {
 		fmt.Printf("init db failed,err:%v\n", errDb)
 		return
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *portUser))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	var opts []grpc.ServerOption
 
-	if *tls {
-		creds, err := credentials.NewServerTLSFromFile("keys/server.crt", "keys/server.key")
-		if err != nil {
-			log.Fatalf("Failed to generate credentials %v", err)
-		}
-		opts = []grpc.ServerOption{grpc.Creds(creds)}
-	}
-
 	s := grpc.NewServer(opts...)
 	demo.RegisterDemoServer(s, &demoServer{})
 	reflection.Register(s)
-	log.Printf("Server listeing at :%v\n", *port)
+	log.Printf("Server listening at :%v\n", *portUser)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalln(err)
 	}

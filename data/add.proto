@@ -1,8 +1,13 @@
 syntax = "proto3";
 
+
 option go_package = "./;demo";
 
 package demo;
+
+message Request {
+  string name = 1;
+}
 
 message UserId {
   int32 userId = 1;
@@ -14,12 +19,48 @@ message UserInfo {
   int32 balance = 3;
 }
 
+message ProductId {
+  int32 productId = 1;
+}
+
+message Product {
+  int32 id = 1;
+  string name = 2;
+  int32 stock = 3;
+  int32 price = 4;
+}
+
+message Products {
+  repeated Product product = 1;
+}
+
+message OrderInfo {
+  int32 userId = 1;
+  int32 productId = 2;
+}
+
 message Response {
   int32 result = 1;
+}
+
+message DecreaseBalance {
+  int32 userId = 1;
+  int32 price = 2;
+  int32 balance = 3;
+}
+
+message Empty {
+
 }
 
 // 定义服务
 service Demo {
   // 简单模式。一个请求，一个响应。
   rpc getUserByUserId(UserId) returns (UserInfo);
+  rpc getProducts(Empty) returns (stream Product);
+  rpc getProduct(ProductId) returns (Product);
+  rpc makeOrder(OrderInfo) returns (Response);
+  rpc decreaseUserBalance(DecreaseBalance) returns (Response);
+  rpc decreaseProductStock(ProductId) returns (Response);
+  rpc createUser(UserInfo) returns (Response);
 }
