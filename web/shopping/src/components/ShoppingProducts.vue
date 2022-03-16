@@ -132,7 +132,7 @@ export default {
         alert("you need to choose at least one product");
       }
       var p_id = this.multipleSelection[0].id
-      var u_id = "1"
+      var u_id = this.user_id
       axios.get(RPC_URL+"/MakeOrder?productId="+p_id+"&userId="+u_id)
       .then((response)=>{
           if(response.status == 200){
