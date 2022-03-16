@@ -7,9 +7,9 @@
 
 This application could be build and deployed on localhost, and different servers (including a user server, a product server and an order server) will run on different ports. We have also deployed this application on our own server, you can test the application on (vue ip address). 
 
-If you want to deploy the server on different machine, remember to change the ServerAddr in RPC client/main.go
+If you want to deploy the server on different machine, remember to change the `ServerAddr` in RPC `client/main.go`
 
-You will need to change the RPC_URL in web/shopping/src/components/ShoppingProducts.vue if you deploy the application on your own machine.
+You will need to change the `RPC_URL` in `web/shopping/src/components/ShoppingProducts.vue` if you deploy the application on your own machine.
 
 Here is the localhost deploy steps:
 
