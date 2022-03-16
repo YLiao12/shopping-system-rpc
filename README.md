@@ -30,5 +30,10 @@ The MySQL is on a Aliyun Server
 `go run client/main.go`
 
 
+## 3.  deploy Vue module
 
+`cd web/shopping`
+`npm install`
+`npm run serve`
+Access the system via your browser 
 
