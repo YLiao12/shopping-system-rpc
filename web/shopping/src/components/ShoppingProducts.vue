@@ -4,6 +4,10 @@
     <h6 class="userinfo" v :title="user_info">{{user_info}}</h6>
     </div>
     <div class = "search">
+      <el-input class="usersearch" v-model="user_id" placeholder="1～10">
+      <template slot="prepend">UserId:</template>
+      <el-button slot="append" icon="el-icon-search" @click="GetUser()"></el-button> 
+      </el-input>
       <el-input  v-model="input_pid" placeholder="please enter productId">
         <el-button slot="append" icon="el-icon-search" @click="OneProduct()"></el-button> 
       </el-input>
@@ -52,6 +56,9 @@
         </el-table-column>
       </el-table>
     </div>
+    <div>
+      <p class="hint">System now can just handle the order with one product</p>
+    </div>
     
   </div>
   
@@ -71,6 +78,8 @@ export default {
       products:[],
       multipleSelection:[],
       input_pid:"",
+      oreder_status:0,
+      user_id:"1",
     }
   },
   mounted() {
@@ -82,23 +91,35 @@ export default {
         axios.get("http://103.49.160.227:5555/AllProducts")
         .then((response)=>{
           if(response.status == 200){
+            var data = response.data
             this.products = response.data;
-            console.log(response.data)
+            for(let i in data){
+              if(!Object.prototype.hasOwnProperty.call(data[i],"stock")){
+                Object.assign(data[i],{stock:0})
+              }
+            }
+           // console.log(response.data)
             
           }
         })
       
     },
     GetUser(){
-      axios.get("http://103.49.160.227:5555/GetUser")
-      .then((response)=>{
+      var userid = this.user_id;
+      var userint = parseInt(userid);
+      if(userint<=10 && userint>=1){
+        axios.get("http://103.49.160.227:5555/GetUser?userId="+userid)
+        .then((response)=>{
           if(response.status == 200){
             var user = response.data;
             console.log(response.data)
             this.user_info = "Hi,"+user.name+"  your balance now is: "+user.balance
-            
           }
         })
+      }else{
+        this.$message('can only input userId in 1~10');
+      }
+      
     },
     handleSelectionChange(val) {
         console.log(val)
@@ -110,11 +131,22 @@ export default {
         alert("you need to choose at least one product");
       }
       var p_id = this.multipleSelection[0].id
-      var u_id = this.user_id
+      var u_id = "1"
       axios.get("http://103.49.160.227:5555/MakeOrder?productId="+p_id+"&userId="+u_id)
       .then((response)=>{
           if(response.status == 200){
+            var order_result = response.data;
+            console.log(order_result)
+            if(order_result == 2){
+              this.order_result = 0
+              this.$message('Failed to order,understock');
+            }
+            if(order_result == 1){
+              this.order_result = 0
+              this.$message('Failed to order, insufficient balance');
+            }
             this.AllProduct()
+            this.GetUser()
           }
         })
     },
@@ -145,6 +177,9 @@ export default {
 .search{
   width:40%;
   margin: auto;
+}
+.usersearch{
+  width:50%
 }
 
 .products-list{
@@ -178,6 +213,11 @@ export default {
   }
   .row-bg {
     padding: 10px 0;
+  }
+  .hint{
+    font-family: Arial;
+    font-size:9px;
+    color:#CDCDCD;
   }
 
 </style>

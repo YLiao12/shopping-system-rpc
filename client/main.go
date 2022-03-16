@@ -40,6 +40,9 @@ func findProduct(client demo.DemoClient, productId *demo.ProductId) []*demo.Prod
 		log.Fatalf("%v.GetFeatures(_) = _, %v: ", client, err)
 	}
 	fmt.Printf("返回内容: %v", resp.Name)
+	// if(resp.Stock == nil){
+	// 	resp.Stock = int32(0)
+	// }
 	products = append(products, resp)
 	return products
 }
@@ -63,21 +66,22 @@ func findProducts(client demo.DemoClient) []*demo.Product {
 			log.Fatalf("%v.GetStream错误=%v", client, err)
 		}
 		fmt.Printf("本次返回结果:%v\n", resp.Name)
+		// fmt.Println(resp)
 		products = append(products, resp)
 	}
 	fmt.Println(products[1])
 	return products
 }
 
-func makeOrder(client demo.DemoClient, orderInfo *demo.OrderInfo) *demo.Response {
+func makeOrder(client demo.DemoClient, orderInfo *demo.OrderInfo) int32 {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	resp, err := client.MakeOrder(ctx, orderInfo)
 	if err != nil {
 		log.Fatalf("%v.GetFeatures(_) = _, %v: ", client, err)
 	}
-	fmt.Printf("返回内容: %v \n", resp.Result)
-	return resp
+	fmt.Printf("ordercode: %v \n", resp.Result)
+	return resp.Result
 }
 
 func Cors() gin.HandlerFunc {
@@ -165,7 +169,9 @@ func main() {
 
 	r.GET("/GetUser", func(c *gin.Context) {
 		fmt.Printf("#############GetUser RPC test########\n")
-		user := findUsers(userclient, &demo.UserId{UserId: 1})
+		u_id, _ := strconv.ParseInt(c.Query("userId"), 10, 32)
+		user_id := int32(u_id)
+		user := findUsers(userclient, &demo.UserId{UserId: user_id})
 		c.JSON(200, user)
 	})
 
