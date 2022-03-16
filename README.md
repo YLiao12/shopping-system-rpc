@@ -1,21 +1,18 @@
 # shopping-system-rpc
 
-![image](https://user-images.githubusercontent.com/62742611/158137046-8b00b82f-bd5f-4c84-8061-d73360541438.png)
+![sho](https://user-images.githubusercontent.com/62742611/158542354-97409069-2131-4345-8dc3-57b915aaa422.png)
 
 
-All server can run on localhost with different ports
+## How to build this rpc application
 
-user server port: 50055
+This application could be build and deployed on localhost, and different servers (including a user server, a product server and an order server) will run on different ports. We have also deployed this application on our own server, you can test the application on (vue ip address). 
 
-product server port: 50056
+Here is the localhost deploy steps:
+ 
 
-order server port: 50057
+### 1. run servers on different terminals
 
-The MySQL is on a Aliyun Server
-
-
-
-## 1. run servers on different terminals
+`cd shopping-system-rpc`
 
 `go run .\user_server\user_server.go`
 
@@ -24,11 +21,21 @@ The MySQL is on a Aliyun Server
 `go run .\order_server\order_server.go`
 
 
-## 2. the client is use to test order
+### 2. run the rpc client
 
 
 `go run client/main.go`
 
 
+### 3.  deploy Vue module
 
+```
+cd web/shopping
+
+npm install
+
+npm run serve
+```
+
+Access the system via your browser 
 
