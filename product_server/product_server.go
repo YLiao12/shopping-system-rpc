@@ -87,6 +87,8 @@ func (s *demoServer) GetProducts(emp *demo.Empty, pipe demo.Demo_GetProductsServ
 			fmt.Printf("scan failed, err:%v\n", err)
 		}
 
+		fmt.Println(p)
+
 		errSend := pipe.Send(&demo.Product{
 			Id:    p.id,
 			Name:  p.name,

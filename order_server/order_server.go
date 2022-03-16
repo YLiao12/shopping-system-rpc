@@ -123,6 +123,10 @@ func (s *demoServer) MakeOrder(ctx context.Context, order *demo.OrderInfo) (*dem
 	user := findUser(userClient, userId)
 	balance := user.Balance
 
+	var response *demo.Response
+
+	fmt.Printf("商品的库存为：%d.\n ", stock)
+
 	// 更新order表
 	if stock > 0 && balance > price {
 		sqlStr := "insert into orders(user_id, product_id) values (?,?)"
@@ -141,10 +145,17 @@ func (s *demoServer) MakeOrder(ctx context.Context, order *demo.OrderInfo) (*dem
 
 		// 减少商品库存
 		decreaseStock(productClient, productId)
-	}
-
-	response := &demo.Response{
-		Result: 1,
+		response = &demo.Response{
+			Result: 0,
+		}
+	} else if stock == 0 {
+		response = &demo.Response{
+			Result: 2,
+		}
+	} else {
+		response = &demo.Response{
+			Result: 1,
+		}
 	}
 
 	return response, nil
