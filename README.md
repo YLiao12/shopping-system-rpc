@@ -3,16 +3,6 @@
 ![sho](https://user-images.githubusercontent.com/62742611/158542354-97409069-2131-4345-8dc3-57b915aaa422.png)
 
 
-All server can run on localhost with different ports
-
-user server port: 50055
-
-product server port: 50056
-
-order server port: 50057
-
-The MySQL is on a Aliyun Server
-
 ## How to build this rpc application
 
 This application could be build and deployed on localhost, and different servers (including a user server, a product server and an order server) will run on different ports. We have also deployed this application on our own server, you can test the application on (vue ip address). 
