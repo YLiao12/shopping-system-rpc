@@ -88,7 +88,7 @@ export default {
   },
   methods: {
     AllProduct() {
-        axios.get("http://103.49.160.227:5555/AllProducts")
+        axios.get("http://139.196.187.198:5555/AllProducts")
         .then((response)=>{
           if(response.status == 200){
             var data = response.data
@@ -108,7 +108,7 @@ export default {
       var userid = this.user_id;
       var userint = parseInt(userid);
       if(userint<=10 && userint>=1){
-        axios.get("http://103.49.160.227:5555/GetUser?userId="+userid)
+        axios.get("http://139.196.187.198:5555/GetUser?userId="+userid)
         .then((response)=>{
           if(response.status == 200){
             var user = response.data;
@@ -132,7 +132,7 @@ export default {
       }
       var p_id = this.multipleSelection[0].id
       var u_id = "1"
-      axios.get("http://103.49.160.227:5555/MakeOrder?productId="+p_id+"&userId="+u_id)
+      axios.get("http://139.196.187.198:5555/MakeOrder?productId="+p_id+"&userId="+u_id)
       .then((response)=>{
           if(response.status == 200){
             var order_result = response.data;
@@ -152,7 +152,7 @@ export default {
     },
     OneProduct(){
       var input_product = this.input_pid
-      axios.get("http://103.49.160.227:5555/OneProduct?productId="+input_product)
+      axios.get("http://139.196.187.198:5555/OneProduct?productId="+input_product)
       .then((response)=>{
           if(response.status == 200){
             this.products = response.data;
