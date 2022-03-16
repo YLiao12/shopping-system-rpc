@@ -5,7 +5,7 @@
 
 ## How to build this rpc application
 
-This application could be build and deployed on localhost, and different servers (including a user server, a product server and an order server) will run on different ports. We have also deployed this application on our own server, you can test the application on (vue ip address). 
+This application could be build and deployed on localhost, and different servers (including a user server, a product server and an order server) will run on different ports. We have also deployed this application on our own server, you can test the application on http://103.49.160.227:9099/. 
 
 If you want to deploy the server on different machine, remember to change the `ServerAddr` in RPC `client/main.go`
 
