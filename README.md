@@ -13,9 +13,16 @@ order server port: 50057
 
 The MySQL is on a Aliyun Server
 
+## How to build this rpc application
 
+This application could be build and deployed on localhost, and different servers (including a user server, a product server and an order server) will run on different ports. We have also deployed this application on our own server, you can test the application on (vue ip address). 
 
-## 1. run servers on different terminals
+Here is the localhost deploy steps:
+ 
+
+### 1. run servers on different terminals
+
+`cd shopping-system-rpc`
 
 `go run .\user_server\user_server.go`
 
@@ -24,13 +31,13 @@ The MySQL is on a Aliyun Server
 `go run .\order_server\order_server.go`
 
 
-## 2. the client is use to test order
+### 2. run the rpc client
 
 
 `go run client/main.go`
 
 
-## 3.  deploy Vue module
+### 3.  deploy Vue module
 
 ```
 cd web/shopping
