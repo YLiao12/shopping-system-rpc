@@ -33,7 +33,10 @@ The MySQL is on a Aliyun Server
 ## 3.  deploy Vue module
 
 `cd web/shopping`
+
 `npm install`
+
 `npm run serve`
+
 Access the system via your browser 
 
